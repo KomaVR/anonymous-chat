@@ -1,30 +1,79 @@
+/* Global styles */
 body {
   font-family: Arial, sans-serif;
-  background-color: #f0f0f0;
+  background-color: #f4f4f4;
   color: #333;
   text-align: center;
   padding-top: 50px;
 }
 
-textarea {
-  width: 60%;
+/* Container for the chat */
+.chat-container {
+  width: 80%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+h1 {
+  color: #333;
+  font-size: 24px;
   margin-bottom: 20px;
 }
 
-button {
+/* Message box */
+.messages-box {
+  width: 100%;
+  height: 300px;
+  overflow-y: auto;
+  margin-bottom: 20px;
   padding: 10px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  text-align: left;
+  font-size: 16px;
+  white-space: pre-wrap; /* Ensures the formatting of messages is preserved */
+  word-wrap: break-word; /* Breaks long words to prevent overflow */
+}
+
+/* Text area for typing messages */
+textarea {
+  width: 100%;
+  max-width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  resize: none; /* Disable resizing */
+}
+
+/* Send button */
+button {
+  padding: 10px 20px;
   background-color: #4CAF50;
   color: white;
   border: none;
+  border-radius: 5px;
   cursor: pointer;
+  font-size: 16px;
 }
 
 button:hover {
   background-color: #45a049;
 }
 
-#messages {
-  margin-top: 20px;
-  max-height: 300px;
-  overflow-y: scroll;
+/* Styling for messages */
+#messages p {
+  background-color: #e0f7fa;
+  margin: 5px;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 16px;
 }
