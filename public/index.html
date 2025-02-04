@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anonymous WebRTC Chat</title>
+  <style>
+    #messages {
+      width: 100%;
+      height: 300px;
+      overflow-y: scroll;
+    }
+    #messageInput {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h1>Anonymous WebRTC Chat</h1>
+  <textarea id="messages" readonly></textarea><br>
+  <input id="messageInput" placeholder="Type your message" />
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    const signalingServerUrl = 'https://your-project.vercel.app/api/signaling'; // Vercel Function URL
+    const messagesContainer = document.getElementById('messages');
+    const messageInput = document.getElementById('messageInput');
+    let peerConnection;
+    let dataChannel;
+    let clientId = Math.random().toString(36).substring(2); // Random client ID for anonymity
+
+    const encryptor = new JSEncrypt();
+    encryptor.getKey();
+
+    // Connect to the signaling server
+    const socket = new WebSocket('wss://your-project.vercel.app/api/signaling');
+    
+    socket.onopen = () => {
+      console.log('Connected to signaling server');
+    };
+
+    socket.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message.type === 'offer') {
+        handleOffer(message);
+      } else if (message.type === 'answer') {
+        handleAnswer(message);
+      } else if (message.type === 'iceCandidate') {
+        handleIceCandidate(message);
+      }
+    };
+
+    function startConnection() {
+      peerConnection = new RTCPeerConnection();
+      dataChannel = peerConnection.createDataChannel('chat');
+      
+      dataChannel.onopen = () => {
+        console.log('Data channel is open');
+      };
+
+      dataChannel.onmessage = (event) => {
+        const decryptedMessage = decryptMessage(event.data);
+        messagesContainer.value += 'Peer: ' + decryptedMessage + '\n';
+      };
+
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+          sendSignal({ type: 'iceCandidate', candidate: event.candidate });
+        }
+      };
+
+      peerConnection.createOffer().then((offer) => {
+        peerConnection.setLocalDescription(offer);
+        sendSignal({ type: 'offer', offer: offer, target: 'peer-id' });
+      });
+    }
+
+    function sendSignal(message) {
+      fetch(signalingServerUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(message),
+      });
+    }
+
+    function sendMessage() {
+      const message = messageInput.value;
+      const encryptedMessage = encryptor.encrypt(message);  // Encrypt the message
+      dataChannel.send(encryptedMessage);
+      messagesContainer.value += 'You: ' + message + '\n';
+    }
+
+    function decryptMessage(encryptedMessage) {
+      return encryptor.decrypt(encryptedMessage);
+    }
+
+    function handleOffer(offer) {
+      peerConnection.setRemoteDescription(new RTCSessionDescription(offer)).then(() => {
+        return peerConnection.createAnswer();
+      }).then((answer) => {
+        peerConnection.setLocalDescription(answer);
+        sendSignal({ type: 'answer', answer: answer });
+      });
+    }
+
+    function handleAnswer(answer) {
+      peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+    }
+
+    function handleIceCandidate(candidate) {
+      peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+    }
+
+    // Initialize and start connection
+    startConnection();
+  </script>
+</body>
+</html>
