@@ -1,30 +1,34 @@
-import { WebSocketServer } from 'ws';
+// api/websocket.js
+import { Server } from 'socket.io';
 
 export default function handler(req, res) {
-  const wss = new WebSocketServer({ noServer: true });
+  if (req.method === 'GET') {
+    res.status(200).send('WebSocket server is running');
+  } else {
+    res.status(405).end();
+  }
+}
 
-  wss.on('connection', (ws) => {
-    console.log('A new client connected');
-    ws.on('message', (message) => {
-      // Broadcast the message to all other clients
-      wss.clients.forEach((client) => {
-        if (client !== ws && client.readyState === WebSocket.OPEN) {
-          client.send(message);
-        }
-      });
+export const config = {
+  api: {
+    bodyParser: false,
+    externalResolver: true,
+  },
+};
+
+export function socketHandler(req, res) {
+  const io = new Server(res.socket.server);
+  io.on('connection', (socket) => {
+    console.log('A user connected');
+
+    socket.on('message', (msg) => {
+      io.emit('message', msg); // Broadcast message to all connected clients
     });
 
-    ws.on('close', () => {
-      console.log('A client disconnected');
+    socket.on('disconnect', () => {
+      console.log('User disconnected');
     });
   });
 
-  // Attach the WebSocket server to the Vercel server
-  req.socket.server.on('upgrade', (request, socket, head) => {
-    wss.handleUpgrade(request, socket, head, (ws) => {
-      wss.emit('connection', ws, request);
-    });
-  });
-
-  res.status(200).send('WebSocket server is running');
+  res.socket.server.io = io;
 }
