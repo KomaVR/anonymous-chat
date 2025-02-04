@@ -7,11 +7,18 @@
   <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
-  <h1>Anonymous WebRTC Chat</h1>
-  <textarea id="messageBox" placeholder="Send a message..." rows="4" cols="50"></textarea><br>
-  <button onclick="sendMessage()">Send Message</button>
+  <div class="chat-container">
+    <h1>Anonymous WebRTC Chat</h1>
 
-  <div id="messages"></div>
+    <!-- Message display area -->
+    <div id="messages" class="messages-box">
+      <!-- Messages will be dynamically added here -->
+    </div>
+
+    <!-- Message input area -->
+    <textarea id="messageBox" placeholder="Type a message..." rows="4" cols="50"></textarea><br>
+    <button onclick="sendMessage()">Send Message</button>
+  </div>
 
   <script src="/assets/script.js"></script>
 </body>
