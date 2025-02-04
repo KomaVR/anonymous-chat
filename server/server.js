@@ -1,28 +1,34 @@
-const WebSocket = require('ws');
+// api/websocket.js
+import { Server } from 'socket.io';
 
-const wss = new WebSocket.Server({ port: 8080 });
-const clients = [];
+export default function handler(req, res) {
+  if (req.method === 'GET') {
+    res.status(200).send('WebSocket server is running');
+  } else {
+    res.status(405).end();
+  }
+}
 
-wss.on('connection', (ws) => {
-  console.log('A new client connected');
-  clients.push(ws);
+export const config = {
+  api: {
+    bodyParser: false,
+    externalResolver: true,
+  },
+};
 
-  ws.on('message', (message) => {
-    console.log('Received:', message);
+export function socketHandler(req, res) {
+  const io = new Server(res.socket.server);
+  io.on('connection', (socket) => {
+    console.log('A user connected');
 
-    clients.forEach((client) => {
-      if (client !== ws) {
-        client.send(message);
-      }
+    socket.on('message', (msg) => {
+      io.emit('message', msg); // Broadcast message to all connected clients
+    });
+
+    socket.on('disconnect', () => {
+      console.log('User disconnected');
     });
   });
 
-  ws.on('close', () => {
-    const index = clients.indexOf(ws);
-    if (index !== -1) {
-      clients.splice(index, 1);
-    }
-  });
-});
-
-console.log('WebSocket server running on ws://localhost:8080');
+  res.socket.server.io = io;
+}
