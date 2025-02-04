@@ -1,34 +1,26 @@
-// api/websocket.js
-import { Server } from 'socket.io';
+// server/server.js
+const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
 
-export default function handler(req, res) {
-  if (req.method === 'GET') {
-    res.status(200).send('WebSocket server is running');
-  } else {
-    res.status(405).end();
-  }
-}
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
 
-export const config = {
-  api: {
-    bodyParser: false,
-    externalResolver: true,
-  },
-};
+app.use(express.static('public'));
 
-export function socketHandler(req, res) {
-  const io = new Server(res.socket.server);
-  io.on('connection', (socket) => {
-    console.log('A user connected');
-
-    socket.on('message', (msg) => {
-      io.emit('message', msg); // Broadcast message to all connected clients
-    });
-
-    socket.on('disconnect', () => {
-      console.log('User disconnected');
-    });
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  
+  socket.on('message', (msg) => {
+    io.emit('message', msg); // Broadcast message to all clients
   });
 
-  res.socket.server.io = io;
-}
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+});
+
+server.listen(3000, () => {
+  console.log('listening on *:3000');
+});
