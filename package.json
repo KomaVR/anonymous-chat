@@ -1,22 +1,16 @@
 {
-  "name": "anonymous-webrtc-chat",
+  "name": "anonymous-chat",
   "version": "1.0.0",
-  "description": "A simple anonymous WebRTC-based chat app with Vercel serverless functions",
-  "main": "index.js",
   "scripts": {
     "dev": "vercel dev",
-    "deploy": "vercel deploy"
+    "build": "vercel build",
+    "start": "node server.js"
   },
   "dependencies": {
-    "ws": "^8.5.0",
-    "jsencrypt": "^3.0.0"
-  },
-  "devDependencies": {
-    "vercel": "^28.0.0"
+    "express": "^4.17.3",
+    "socket.io": "^4.4.1"
   },
   "engines": {
-    "node": "22.x"
-  },
-  "author": "Your Name",
-  "license": "MIT"
+    "node": "18.x"
+  }
 }
